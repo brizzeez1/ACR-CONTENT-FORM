@@ -171,7 +171,8 @@
         descWrap.className = 'w-full sm:w-2/3';
         descWrap.innerHTML = `
           <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider">Description</label>
-          <input type="text" class="mt-1 block w-full rounded-md border-gray-300 focus:ring-indigo-500 focus:border-indigo-500 text-sm p-2"
+          <input name="description[]" type="text"
+                 class="mt-1 block w-full rounded-md border-gray-300 focus:ring-indigo-500 focus:border-indigo-500 text-sm p-2"
                  placeholder="e.g., Labor, Materials, etc." required value="${item.description}">
         `;
         const descInput = descWrap.querySelector('input');
@@ -183,7 +184,8 @@
         qtyWrap.className = 'sm:w-1/3';
         qtyWrap.innerHTML = `
           <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider">Qty</label>
-          <input type="number" step="1" class="mt-1 block w-full rounded-md border-gray-300 focus:ring-indigo-500 focus:border-indigo-500 text-sm p-2"
+          <input name="qty[]" type="number" step="1"
+                 class="mt-1 block w-full rounded-md border-gray-300 focus:ring-indigo-500 focus:border-indigo-500 text-sm p-2"
                  placeholder="1" required value="${item.qty}">
         `;
         const qtyInput = qtyWrap.querySelector('input');
@@ -233,6 +235,7 @@
       renderItems();
     });
 
+    // Initial render
     renderItems();
 
     // pack JSON and show loader on submit
