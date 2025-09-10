@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Job Details – ACR</title>
+  <!-- Tailwind (OK for now; we can switch to a built build later) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* tiny tweak for spin icon */
+    .animate-spin { animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body class="min-h-screen bg-slate-50 flex items-center justify-center p-4 sm:p-6">
+  <div class="w-full max-w-2xl bg-white shadow-xl rounded-2xl overflow-hidden transition-all duration-300 ease-in-out hover:shadow-2xl">
+    <div class="p-6 sm:p-8">
+      <div class="flex items-center space-x-4 mb-8">
+        <div class="p-3 bg-indigo-100 rounded-full">
+          <!-- List Icon -->
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+               viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+               class="text-indigo-600">
+            <line x1="8" x2="21" y1="6" y2="6"></line>
+            <line x1="8" x2="21" y1="12" y2="12"></line>
+            <line x1="8" x2="21" y1="18" y2="18"></line>
+            <line x1="3" x2="3.01" y1="6" y2="6"></line>
+            <line x1="3" x2="3.01" y1="12" y2="12"></line>
+            <line x1="3" x2="3.01" y1="18" y2="18"></line>
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight sm:text-4xl">Job Details</h1>
+          <p class="text-gray-500 mt-1">Enter the job information and line items below.</p>
+        </div>
+      </div>
+
+      <!-- Hidden iframe keeps page in place after submit -->
+      <iframe name="hidden_iframe" id="hidden_iframe" class="hidden"></iframe>
+
+      <form id="jobForm"
+            class="space-y-6"
+            method="POST"
+            action="https://script.google.com/macros/s/AKfycbyD446MyyOehOyhGVZIMhcgAx9vv0kSYRkFm8B31WjtpOC5UR3l9kf2MQwLRStj_5TB/exec"
+            target="hidden_iframe">
+
+        <!-- Hidden JSON payload for line items (we fill this before submit) -->
+        <input type="hidden" id="payload" name="payload" value=""/>
+
+        <!-- Job Name -->
+        <div class="space-y-4">
+          <label for="jobName" class="block text-sm font-medium text-gray-700">Job Name</label>
+          <div class="mt-1 flex rounded-md shadow-sm">
+            <span class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
+              <!-- User Icon -->
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                   viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+            </span>
+            <input type="text" id="jobName" name="jobName"
+                   class="flex-1 block w-full rounded-none rounded-r-md border-gray-300 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2 transition-colors duration-200"
+                   placeholder="e.g., ABC Co. Office Renovation" required>
+          </div>
+
+          <!-- Job Address -->
+          <label for="jobAddress" class="block text-sm font-medium text-gray-700 mt-4">Job Address</label>
+          <div class="mt-1 flex rounded-md shadow-sm">
+            <span class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
+              <!-- MapPin Icon -->
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                   viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 21.35a2 2 0 0 1-2.03-2.73C10.74 15.65 12 13 12 13s1.26 2.65 2.03 5.62a2 2 0 0 1-2.03 2.73z"></path>
+                <circle cx="12" cy="10" r="3"></circle>
+                <path d="M12 21.35v-8.35a8.2 8.2 0 0 0 8-8V5c0-4.42-3.58-8-8-8s-8 3.58-8 8v.35c0 5.62 3.6 8.32 8 13z"></path>
+              </svg>
+            </span>
+            <input type="text" id="jobAddress" name="jobAddress"
+                   class="flex-1 block w-full rounded-none rounded-r-md border-gray-300 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2 transition-colors duration-200"
+                   placeholder="e.g., 123 Main St, Anytown" required>
+          </div>
+        </div>
+
+        <!-- Line Items -->
+        <div class="mt-8 space-y-4">
+          <h2 class="text-xl font-bold text-gray-900">Line Items</h2>
+          <div id="itemsContainer" class="space-y-4"></div>
+
+          <div class="text-center sm:text-left">
+            <button type="button" id="addItemBtn"
+                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-full shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200 mt-4">
+              <!-- PlusCircle Icon -->
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                   viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                   class="-ml-1 mr-2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M12 8v8"></path>
+                <path d="M8 12h8"></path>
+              </svg>
+              Add Line Item
+            </button>
+          </div>
+        </div>
+
+        <!-- Submit -->
+        <div class="pt-6 border-t border-gray-200 mt-8">
+          <button id="submitBtn" type="submit"
+                  class="w-full flex justify-center items-center py-3 px-6 border border-transparent rounded-full shadow-sm text-base font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200">
+            <!-- Save Icon (shown when not submitting) -->
+            <svg id="saveIcon" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                 viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                 class="-ml-1 mr-3">
+              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+              <polyline points="17 21 17 13 7 13 7 21"></polyline>
+              <polyline points="7 3 7 8 15 8"></polyline>
+            </svg>
+            <!-- Loader Icon (hidden by default) -->
+            <svg id="loaderIcon" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                 viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                 class="mr-3 hidden animate-spin">
+              <path d="M21 12a9 9 0 1 1-6.219-8.56"></path>
+            </svg>
+            <span id="submitText">Submit Job</span>
+          </button>
+        </div>
+
+        <!-- status messages -->
+        <div id="msgOk" class="mt-4 text-center hidden">
+          <p class="text-sm font-medium text-green-600">Form submitted successfully!</p>
+        </div>
+        <div id="msgErr" class="mt-4 text-center hidden">
+          <p class="text-sm font-medium text-red-600">Error submitting form. Please try again.</p>
+        </div>
+
+        <p class="text-xs text-gray-500 mt-3 text-center">Tip: On iPhone, share → “Add to Home Screen”.</p>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // ------- Dynamic Items UI (no React needed) -------
+    const itemsContainer = document.getElementById('itemsContainer');
+    const addItemBtn = document.getElementById('addItemBtn');
+    const form = document.getElementById('jobForm');
+    const payloadInput = document.getElementById('payload');
+
+    const submitBtn = document.getElementById('submitBtn');
+    const saveIcon = document.getElementById('saveIcon');
+    const loaderIcon = document.getElementById('loaderIcon');
+    const submitText = document.getElementById('submitText');
+
+    const msgOk = document.getElementById('msgOk');
+    const msgErr = document.getElementById('msgErr');
+
+    let items = [{ description: '', qty: '' }];
+
+    function renderItems() {
+      itemsContainer.innerHTML = '';
+      items.forEach((item, index) => {
+        const row = document.createElement('div');
+        row.className = 'flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 bg-gray-50 p-4 rounded-lg shadow-inner border border-gray-200';
+
+        // # number
+        const num = document.createElement('div');
+        num.className = 'sm:w-1/6 flex items-center justify-center sm:block';
+        num.innerHTML = `<span class="text-lg font-bold text-indigo-600">#${index + 1}</span>`;
+
+        // description
+        const descWrap = document.createElement('div');
+        descWrap.className = 'w-full sm:w-2/3';
+        descWrap.innerHTML = `
+          <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider">Description</label>
+          <input type="text" class="mt-1 block w-full rounded-md border-gray-300 focus:ring-indigo-500 focus:border-indigo-500 text-sm p-2"
+                 placeholder="e.g., Labor, Materials, etc." required value="${item.description}">
+        `;
+        const descInput = descWrap.querySelector('input');
+        descInput.addEventListener('input', (e) => {
+          items[index].description = e.target.value;
+        });
+
+        // qty
+        const qtyWrap = document.createElement('div');
+        qtyWrap.className = 'sm:w-1/3';
+        qtyWrap.innerHTML = `
+          <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider">Qty</label>
+          <input type="number" step="1" class="mt-1 block w-full rounded-md border-gray-300 focus:ring-indigo-500 focus:border-indigo-500 text-sm p-2"
+                 placeholder="1" required value="${item.qty}">
+        `;
+        const qtyInput = qtyWrap.querySelector('input');
+        qtyInput.addEventListener('input', (e) => {
+          items[index].qty = e.target.value;
+        });
+
+        // remove button
+        let removeBtn = null;
+        if (items.length > 1) {
+          removeBtn = document.createElement('button');
+          removeBtn.type = 'button';
+          removeBtn.className = 'p-2 text-red-500 hover:text-red-700 transition-colors duration-200 self-end';
+          removeBtn.title = 'Remove Line Item';
+          removeBtn.innerHTML = `
+            <!-- Trash Icon -->
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                 viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 6h18"></path>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              <path d="M10 11v6"></path>
+              <path d="M14 11v6"></path>
+            </svg>
+          `;
+          removeBtn.addEventListener('click', () => {
+            items = items.filter((_, i) => i !== index);
+            renderItems();
+          });
+        }
+
+        row.appendChild(num);
+        row.appendChild(descWrap);
+        row.appendChild(qtyWrap);
+        if (removeBtn) {
+          const btnWrap = document.createElement('div');
+          btnWrap.className = 'flex items-end';
+          btnWrap.appendChild(removeBtn);
+          row.appendChild(btnWrap);
+        }
+
+        itemsContainer.appendChild(row);
+      });
+    }
+
+    addItemBtn.addEventListener('click', () => {
+      items.push({ description: '', qty: '' });
+      renderItems();
+    });
+
+    // Initial render
+    renderItems();
+
+    // Submit flow: pack JSON into hidden input and show loader
+    form.addEventListener('submit', () => {
+      msgOk.classList.add('hidden');
+      msgErr.classList.add('hidden');
+      saveIcon.classList.add('hidden');
+      loaderIcon.classList.remove('hidden');
+      submitText.textContent = 'Submitting...';
+
+      const jobName = document.getElementById('jobName').value.trim();
+      const jobAddress = document.getElementById('jobAddress').value.trim();
+
+      const payload = {
+        jobName,
+        jobAddress,
+        lineItems: items.map((it, idx) => ({
+          itemNumber: idx + 1,
+          description: it.description,
+          qty: it.qty
+        }))
+      };
+
+      payloadInput.value = JSON.stringify(payload);
+
+      // after iframe load, reset UI
+      const iframe = document.getElementById('hidden_iframe');
+      const onLoad = () => {
+        loaderIcon.classList.add('hidden');
+        saveIcon.classList.remove('hidden');
+        submitText.textContent = 'Submit Job';
+        msgOk.classList.remove('hidden');
+        form.reset();
+        items = [{ description: '', qty: '' }];
+        renderItems();
+        iframe.removeEventListener('load', onLoad);
+      };
+      iframe.addEventListener('load', onLoad);
+    });
+  </script>
+</body>
+</html>
