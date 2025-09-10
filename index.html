@@ -4,10 +4,8 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Job Details – ACR</title>
-  <!-- Tailwind (OK for now; we can switch to a built build later) -->
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    /* tiny tweak for spin icon */
     .animate-spin { animation: spin 1s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
   </style>
@@ -36,7 +34,7 @@
         </div>
       </div>
 
-      <!-- Hidden iframe keeps page in place after submit -->
+      <!-- Hidden iframe keeps page from navigating away after submit -->
       <iframe name="hidden_iframe" id="hidden_iframe" class="hidden"></iframe>
 
       <form id="jobForm"
@@ -45,7 +43,7 @@
             action="https://script.google.com/macros/s/AKfycbyD446MyyOehOyhGVZIMhcgAx9vv0kSYRkFm8B31WjtpOC5UR3l9kf2MQwLRStj_5TB/exec"
             target="hidden_iframe">
 
-        <!-- Hidden JSON payload for line items (we fill this before submit) -->
+        <!-- Hidden JSON payload for line items -->
         <input type="hidden" id="payload" name="payload" value=""/>
 
         <!-- Job Name -->
@@ -111,7 +109,7 @@
         <div class="pt-6 border-t border-gray-200 mt-8">
           <button id="submitBtn" type="submit"
                   class="w-full flex justify-center items-center py-3 px-6 border border-transparent rounded-full shadow-sm text-base font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200">
-            <!-- Save Icon (shown when not submitting) -->
+            <!-- Save Icon -->
             <svg id="saveIcon" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
                  viewBox="0 0 24 24" fill="none" stroke="currentColor"
                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -120,7 +118,7 @@
               <polyline points="17 21 17 13 7 13 7 21"></polyline>
               <polyline points="7 3 7 8 15 8"></polyline>
             </svg>
-            <!-- Loader Icon (hidden by default) -->
+            <!-- Loader Icon -->
             <svg id="loaderIcon" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
                  viewBox="0 0 24 24" fill="none" stroke="currentColor"
                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -151,11 +149,9 @@
     const form = document.getElementById('jobForm');
     const payloadInput = document.getElementById('payload');
 
-    const submitBtn = document.getElementById('submitBtn');
     const saveIcon = document.getElementById('saveIcon');
     const loaderIcon = document.getElementById('loaderIcon');
     const submitText = document.getElementById('submitText');
-
     const msgOk = document.getElementById('msgOk');
     const msgErr = document.getElementById('msgErr');
 
@@ -167,12 +163,10 @@
         const row = document.createElement('div');
         row.className = 'flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 bg-gray-50 p-4 rounded-lg shadow-inner border border-gray-200';
 
-        // # number
         const num = document.createElement('div');
         num.className = 'sm:w-1/6 flex items-center justify-center sm:block';
         num.innerHTML = `<span class="text-lg font-bold text-indigo-600">#${index + 1}</span>`;
 
-        // description
         const descWrap = document.createElement('div');
         descWrap.className = 'w-full sm:w-2/3';
         descWrap.innerHTML = `
@@ -185,7 +179,6 @@
           items[index].description = e.target.value;
         });
 
-        // qty
         const qtyWrap = document.createElement('div');
         qtyWrap.className = 'sm:w-1/3';
         qtyWrap.innerHTML = `
@@ -198,7 +191,6 @@
           items[index].qty = e.target.value;
         });
 
-        // remove button
         let removeBtn = null;
         if (items.length > 1) {
           removeBtn = document.createElement('button');
@@ -241,10 +233,9 @@
       renderItems();
     });
 
-    // Initial render
     renderItems();
 
-    // Submit flow: pack JSON into hidden input and show loader
+    // pack JSON and show loader on submit
     form.addEventListener('submit', () => {
       msgOk.classList.add('hidden');
       msgErr.classList.add('hidden');
@@ -254,7 +245,6 @@
 
       const jobName = document.getElementById('jobName').value.trim();
       const jobAddress = document.getElementById('jobAddress').value.trim();
-
       const payload = {
         jobName,
         jobAddress,
@@ -264,10 +254,8 @@
           qty: it.qty
         }))
       };
+      document.getElementById('payload').value = JSON.stringify(payload);
 
-      payloadInput.value = JSON.stringify(payload);
-
-      // after iframe load, reset UI
       const iframe = document.getElementById('hidden_iframe');
       const onLoad = () => {
         loaderIcon.classList.add('hidden');
