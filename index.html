@@ -38,6 +38,7 @@
         </div>
       </div>
 
+      <!-- keep page on-screen after submit -->
       <iframe name="hidden_iframe" id="hidden_iframe" class="hidden"></iframe>
 
       <form id="jobForm"
@@ -46,15 +47,17 @@
             action="https://script.google.com/macros/s/AKfycbw5T1jrVQtcgcW3KEO5aDaNUhXhiDl9GGPIHfyuSynLxkWUqrpulEYOkK4pKBw5l6hA/exec"
             target="hidden_iframe">
 
+        <!-- JSON payload lives here -->
         <input type="hidden" id="payload" name="payload" value=""/>
 
-        <!-- Job Name with suggestions -->
+        <!-- Job Name with autocomplete -->
         <label for="jobName" class="block text-sm font-medium text-gray-700">Job Name</label>
         <div class="mt-1 relative">
           <input type="text" id="jobName" name="jobName"
                  class="flex-1 block w-full rounded-md border-gray-300 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2"
                  placeholder="Start typing project..." autocomplete="off" required>
-          <ul id="jobSuggestions" class="absolute z-10 bg-white border border-gray-300 rounded-md mt-1 w-full max-h-40 overflow-y-auto hidden"></ul>
+          <ul id="jobSuggestions"
+              class="absolute z-10 bg-white border border-gray-300 rounded-md mt-1 w-full max-h-40 overflow-y-auto hidden"></ul>
         </div>
 
         <!-- Job Address -->
@@ -140,35 +143,46 @@
     const msgOk = document.getElementById('msgOk');
     const msgErr = document.getElementById('msgErr');
 
-    // ---- Autocomplete (keep your existing doGet/JSONP approach if used) ----
+    // ---- Autocomplete via JSONP from Apps Script doGet ----
     const jobInput = document.getElementById('jobName');
     const suggestionBox = document.getElementById('jobSuggestions');
     let projects = [];
+
     function loadProjectsJSONP() {
       const cb = 'projects_cb_' + Date.now();
-      window[cb] = function (data) { projects = Array.isArray(data) ? data : []; delete window[cb]; };
+      window[cb] = function (data) {
+        projects = Array.isArray(data) ? data : [];
+        delete window[cb];
+      };
+      // Replace with your /exec that serves JSON when called with ?callback=
       const s = document.createElement('script');
-      s.src = 'YOUR_EXEC_URL_HERE/exec?callback=' + cb; // <-- replace with your /exec
+      s.src = 'https://script.google.com/macros/s/AKfycbw5T1jrVQtcgcW3KEO5aDaNUhXhiDl9GGPIHfyuSynLxkWUqrpulEYOkK4pKBw5l6hA/exec?callback=' + cb;
       document.body.appendChild(s);
     }
-    // loadProjectsJSONP(); // uncomment if you have doGet set up
+    loadProjectsJSONP();
 
-    jobInput && jobInput.addEventListener('input', () => {
+    jobInput.addEventListener('input', () => {
       if (!projects.length) return;
       const query = jobInput.value.toLowerCase();
       suggestionBox.innerHTML = '';
       if (!query) { suggestionBox.classList.add('hidden'); return; }
+
       const matches = projects.filter(p =>
         (p.name || '').toLowerCase().includes(query) ||
         (p.number || '').toLowerCase().includes(query)
       );
+
       matches.forEach(p => {
         const li = document.createElement('li');
         li.className = 'px-3 py-2 hover:bg-indigo-100 cursor-pointer';
         li.textContent = `${p.number} – ${p.name}`;
-        li.addEventListener('click', () => { jobInput.value = `${p.number} – ${p.name}`; suggestionBox.classList.add('hidden'); });
+        li.addEventListener('click', () => {
+          jobInput.value = `${p.number} – ${p.name}`;
+          suggestionBox.classList.add('hidden');
+        });
         suggestionBox.appendChild(li);
       });
+
       suggestionBox.classList.toggle('hidden', matches.length === 0);
     });
 
@@ -178,7 +192,7 @@
       }
     });
 
-    // ---- Items state now includes room + oversized ----
+    // ---- Items state (Room + Description + Qty + Oversized + Prior Damage) ----
     let items = [{ room: '', description: '', qty: '', oversized: false, priorDamage: false }];
 
     function renderItems() {
@@ -191,7 +205,6 @@
         num.className = 'w-full sm:w-16 flex items-center';
         num.innerHTML = `<span class="text-lg font-bold text-indigo-600">#${index + 1}</span>`;
 
-        // Room (NEW)
         const roomWrap = document.createElement('div');
         roomWrap.className = 'grow sm:flex-1 sm:min-w-[8rem]';
         roomWrap.innerHTML = `
@@ -203,7 +216,6 @@
         const roomInput = roomWrap.querySelector('input');
         roomInput.addEventListener('input', (e) => { items[index].room = e.target.value; });
 
-        // Description
         const descWrap = document.createElement('div');
         descWrap.className = 'grow sm:flex-1 sm:min-w-[12rem]';
         descWrap.innerHTML = `
@@ -215,7 +227,6 @@
         const descInput = descWrap.querySelector('input');
         descInput.addEventListener('input', (e) => { items[index].description = e.target.value; });
 
-        // Qty
         const qtyWrap = document.createElement('div');
         qtyWrap.className = 'sm:w-28';
         qtyWrap.innerHTML = `
@@ -227,7 +238,6 @@
         const qtyInput = qtyWrap.querySelector('input');
         qtyInput.addEventListener('input', (e) => { items[index].qty = e.target.value; });
 
-        // Oversized (NEW) – checkbox before Prior Damage
         const overWrap = document.createElement('div');
         overWrap.className = 'sm:w-48';
         overWrap.innerHTML = `
@@ -241,7 +251,6 @@
         const overInput = overWrap.querySelector('input[type="checkbox"]');
         overInput.addEventListener('change', (e) => { items[index].oversized = e.target.checked; });
 
-        // Prior Damage
         const priorWrap = document.createElement('div');
         priorWrap.className = 'sm:w-64';
         priorWrap.innerHTML = `
@@ -255,23 +264,12 @@
         const priorInput = priorWrap.querySelector('input[type="checkbox"]');
         priorInput.addEventListener('change', (e) => { items[index].priorDamage = e.target.checked; });
 
-        // Remove button
         let removeBtn = null;
         if (items.length > 1) {
           removeBtn = document.createElement('button');
           removeBtn.type = 'button';
           removeBtn.className = 'p-2 text-red-500 hover:text-red-700 transition-colors duration-200 self-end';
-          removeBtn.title = 'Remove Line Item';
-          removeBtn.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                 viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M3 6h18"></path>
-              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-              <path d="M10 11v6"></path>
-              <path d="M14 11v6"></path>
-            </svg>
-          `;
+          removeBtn.textContent = 'Remove';
           removeBtn.addEventListener('click', () => { items = items.filter((_, i) => i !== index); renderItems(); });
         }
 
@@ -294,7 +292,7 @@
 
     renderItems();
 
-    // Pack JSON + submit
+    // Submit handler: pack JSON and rely on Apps Script to parse payload
     form.addEventListener('submit', () => {
       msgOk.classList.add('hidden');
       msgErr.classList.add('hidden');
@@ -302,7 +300,7 @@
       loaderIcon.classList.remove('hidden');
       submitText.textContent = 'Submitting...';
 
-      // Sync from DOM (ensures we capture current values)
+      // Sync from DOM to ensure latest values
       const roomInputs  = document.querySelectorAll('input[name="room[]"]');
       const descInputs  = document.querySelectorAll('input[name="description[]"]');
       const qtyInputs   = document.querySelectorAll('input[name="qty[]"]');
@@ -328,12 +326,13 @@
           room:        it.room,
           description: it.description,
           qty:         it.qty,
-          oversized:   it.oversized,
-          priorDamage: it.priorDamage
+          oversized:   it.oversized,     // boolean; Apps Script converts to "Yes" if true
+          priorDamage: it.priorDamage    // boolean; Apps Script converts to "Yes" if true
         }))
       };
       document.getElementById('payload').value = JSON.stringify(payload);
 
+      // Reset UI after the hidden iframe load completes
       const iframe = document.getElementById('hidden_iframe');
       const onLoad = () => {
         loaderIcon.classList.add('hidden');
