@@ -9,6 +9,8 @@
     .animate-spin { animation: spin 1s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
   </style>
+
+  <!-- PWA icon (optional if you already added) -->
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="icon.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -50,7 +52,7 @@
         <!-- Hidden JSON payload for line items -->
         <input type="hidden" id="payload" name="payload" value=""/>
 
-        <!-- Job Name -->
+        <!-- Job Name / Address -->
         <div class="space-y-4">
           <label for="jobName" class="block text-sm font-medium text-gray-700">Job Name</label>
           <div class="mt-1 flex rounded-md shadow-sm">
@@ -68,7 +70,6 @@
                    placeholder="e.g., ABC Co. Office Renovation" required>
           </div>
 
-          <!-- Job Address -->
           <label for="jobAddress" class="block text-sm font-medium text-gray-700 mt-4">Job Address</label>
           <div class="mt-1 flex rounded-md shadow-sm">
             <span class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
@@ -151,7 +152,6 @@
     const itemsContainer = document.getElementById('itemsContainer');
     const addItemBtn = document.getElementById('addItemBtn');
     const form = document.getElementById('jobForm');
-    const payloadInput = document.getElementById('payload');
 
     const saveIcon = document.getElementById('saveIcon');
     const loaderIcon = document.getElementById('loaderIcon');
@@ -159,20 +159,21 @@
     const msgOk = document.getElementById('msgOk');
     const msgErr = document.getElementById('msgErr');
 
-    let items = [{ description: '', qty: '' }];
+    // now each item has { description, qty, priorDamage: boolean }
+    let items = [{ description: '', qty: '', priorDamage: false }];
 
     function renderItems() {
       itemsContainer.innerHTML = '';
       items.forEach((item, index) => {
         const row = document.createElement('div');
-        row.className = 'flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 bg-gray-50 p-4 rounded-lg shadow-inner border border-gray-200';
+        row.className = 'flex flex-col sm:flex-row sm:items-end space-y-4 sm:space-y-0 sm:space-x-4 bg-gray-50 p-4 rounded-lg shadow-inner border border-gray-200';
 
         const num = document.createElement('div');
         num.className = 'sm:w-1/6 flex items-center justify-center sm:block';
         num.innerHTML = `<span class="text-lg font-bold text-indigo-600">#${index + 1}</span>`;
 
         const descWrap = document.createElement('div');
-        descWrap.className = 'w-full sm:w-2/3';
+        descWrap.className = 'w-full sm:w-1/2';
         descWrap.innerHTML = `
           <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider">Description</label>
           <input name="description[]" type="text"
@@ -180,12 +181,10 @@
                  placeholder="e.g., Labor, Materials, etc." required value="${item.description}">
         `;
         const descInput = descWrap.querySelector('input');
-        descInput.addEventListener('input', (e) => {
-          items[index].description = e.target.value;
-        });
+        descInput.addEventListener('input', (e) => { items[index].description = e.target.value; });
 
         const qtyWrap = document.createElement('div');
-        qtyWrap.className = 'sm:w-1/3';
+        qtyWrap.className = 'sm:w-1/6';
         qtyWrap.innerHTML = `
           <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider">Qty</label>
           <input name="qty[]" type="number" step="1"
@@ -193,10 +192,45 @@
                  placeholder="1" required value="${item.qty}">
         `;
         const qtyInput = qtyWrap.querySelector('input');
-        qtyInput.addEventListener('input', (e) => {
-          items[index].qty = e.target.value;
+        qtyInput.addEventListener('input', (e) => { items[index].qty = e.target.value; });
+
+        // --- Prior Damage control (checkbox styled as a pill button) ---
+        const priorWrap = document.createElement('div');
+        priorWrap.className = 'sm:w-1/3';
+        priorWrap.innerHTML = `
+          <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider">Prior Damage</label>
+          <label class="mt-1 inline-flex items-center select-none px-3 py-2 rounded-full border cursor-pointer
+                        ${item.priorDamage ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-700 border-gray-300'}">
+            <input name="priorDamage[]" type="checkbox" value="Yes" ${item.priorDamage ? 'checked' : ''}
+                   class="hidden">
+            <span>${item.priorDamage ? 'Yes' : 'No'}</span>
+          </label>
+        `;
+        const priorLabel = priorWrap.querySelector('label.inline-flex');
+        const priorInput = priorWrap.querySelector('input[type="checkbox"]');
+        const priorText = priorWrap.querySelector('span');
+
+        function setPriorUI(checked) {
+          if (checked) {
+            priorLabel.classList.remove('bg-white','text-gray-700','border-gray-300');
+            priorLabel.classList.add('bg-indigo-600','text-white','border-indigo-600');
+            priorText.textContent = 'Yes';
+          } else {
+            priorLabel.classList.add('bg-white','text-gray-700','border-gray-300');
+            priorLabel.classList.remove('bg-indigo-600','text-white','border-indigo-600');
+            priorText.textContent = 'No';
+          }
+        }
+        priorLabel.addEventListener('click', (e) => {
+          // allow label click to toggle
+          if (e.target.tagName !== 'INPUT') {
+            priorInput.checked = !priorInput.checked;
+          }
+          items[index].priorDamage = priorInput.checked;
+          setPriorUI(priorInput.checked);
         });
 
+        // Remove button (if more than one line)
         let removeBtn = null;
         if (items.length > 1) {
           removeBtn = document.createElement('button');
@@ -204,7 +238,6 @@
           removeBtn.className = 'p-2 text-red-500 hover:text-red-700 transition-colors duration-200 self-end';
           removeBtn.title = 'Remove Line Item';
           removeBtn.innerHTML = `
-            <!-- Trash Icon -->
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                  viewBox="0 0 24 24" fill="none" stroke="currentColor"
                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -220,9 +253,11 @@
           });
         }
 
+        // Assemble row
         row.appendChild(num);
         row.appendChild(descWrap);
         row.appendChild(qtyWrap);
+        row.appendChild(priorWrap);
         if (removeBtn) {
           const btnWrap = document.createElement('div');
           btnWrap.className = 'flex items-end';
@@ -231,11 +266,14 @@
         }
 
         itemsContainer.appendChild(row);
+
+        // ensure UI reflects initial state
+        setPriorUI(!!item.priorDamage);
       });
     }
 
     addItemBtn.addEventListener('click', () => {
-      items.push({ description: '', qty: '' });
+      items.push({ description: '', qty: '', priorDamage: false });
       renderItems();
     });
 
@@ -258,7 +296,8 @@
         lineItems: items.map((it, idx) => ({
           itemNumber: idx + 1,
           description: it.description,
-          qty: it.qty
+          qty: it.qty,
+          priorDamage: !!it.priorDamage
         }))
       };
       document.getElementById('payload').value = JSON.stringify(payload);
@@ -270,7 +309,7 @@
         submitText.textContent = 'Submit Job';
         msgOk.classList.remove('hidden');
         form.reset();
-        items = [{ description: '', qty: '' }];
+        items = [{ description: '', qty: '', priorDamage: false }];
         renderItems();
         iframe.removeEventListener('load', onLoad);
       };
