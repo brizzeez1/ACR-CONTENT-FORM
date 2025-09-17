@@ -1,7 +1,6 @@
 <!doctype html>
 <html lang="en">
- <head>
-  <!-- PWA icon (optional if you already added) -->
+<head>
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="icon.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -21,7 +20,6 @@
     <div class="p-6 sm:p-8">
       <div class="flex items-center space-x-4 mb-8">
         <div class="p-3 bg-indigo-100 rounded-full">
-          <!-- List Icon -->
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                viewBox="0 0 24 24" fill="none" stroke="currentColor"
                stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -40,7 +38,6 @@
         </div>
       </div>
 
-      <!-- Hidden iframe keeps page from navigating away after submit -->
       <iframe name="hidden_iframe" id="hidden_iframe" class="hidden"></iframe>
 
       <form id="jobForm"
@@ -49,42 +46,32 @@
             action="https://script.google.com/macros/s/AKfycbw5T1jrVQtcgcW3KEO5aDaNUhXhiDl9GGPIHfyuSynLxkWUqrpulEYOkK4pKBw5l6hA/exec"
             target="hidden_iframe">
 
-        <!-- Hidden JSON payload for line items -->
         <input type="hidden" id="payload" name="payload" value=""/>
 
-        <!-- Job Name -->
-        <div class="space-y-4">
-          <label for="jobName" class="block text-sm font-medium text-gray-700">Job Name</label>
-          <div class="mt-1 flex rounded-md shadow-sm">
-            <span class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
-                   viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
-                <circle cx="12" cy="7" r="4"></circle>
-              </svg>
-            </span>
-            <input type="text" id="jobName" name="jobName"
-                   class="flex-1 block w-full rounded-none rounded-r-md border-gray-300 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2 transition-colors duration-200"
-                   placeholder="e.g., ABC Co. Office Renovation" required>
-          </div>
+        <!-- Job Name with suggestions -->
+        <label for="jobName" class="block text-sm font-medium text-gray-700">Job Name</label>
+        <div class="mt-1 relative">
+          <input type="text" id="jobName" name="jobName"
+                 class="flex-1 block w-full rounded-md border-gray-300 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2"
+                 placeholder="Start typing project..." autocomplete="off" required>
+          <ul id="jobSuggestions" class="absolute z-10 bg-white border border-gray-300 rounded-md mt-1 w-full max-h-40 overflow-y-auto hidden"></ul>
+        </div>
 
-          <!-- Job Address -->
-          <label for="jobAddress" class="block text-sm font-medium text-gray-700 mt-4">Job Address</label>
-          <div class="mt-1 flex rounded-md shadow-sm">
-            <span class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
-                   viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 21.35a2 2 0 0 1-2.03-2.73C10.74 15.65 12 13 12 13s1.26 2.65 2.03 5.62a2 2 0 0 1-2.03 2.73z"></path>
-                <circle cx="12" cy="10" r="3"></circle>
-                <path d="M12 21.35v-8.35a8.2 8.2 0 0 0 8-8V5c0-4.42-3.58-8-8-8s-8 3.58-8 8v.35c0 5.62 3.6 8.32 8 13z"></path>
-              </svg>
-            </span>
-            <input type="text" id="jobAddress" name="jobAddress"
-                   class="flex-1 block w-full rounded-none rounded-r-md border-gray-300 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2 transition-colors duration-200"
-                   placeholder="e.g., 123 Main St, Anytown" required>
-          </div>
+        <!-- Job Address -->
+        <label for="jobAddress" class="block text-sm font-medium text-gray-700 mt-4">Job Address</label>
+        <div class="mt-1 flex rounded-md shadow-sm">
+          <span class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                 viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 21.35a2 2 0 0 1-2.03-2.73C10.74 15.65 12 13 12 13s1.26 2.65 2.03 5.62a2 2 0 0 1-2.03 2.73z"></path>
+              <circle cx="12" cy="10" r="3"></circle>
+              <path d="M12 21.35v-8.35a8.2 8.2 0 0 0 8-8V5c0-4.42-3.58-8-8-8s-8 3.58-8 8v.35c0 5.62 3.6 8.32 8 13z"></path>
+            </svg>
+          </span>
+          <input type="text" id="jobAddress" name="jobAddress"
+                 class="flex-1 block w-full rounded-none rounded-r-md border-gray-300 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2 transition-colors duration-200"
+                 placeholder="e.g., 123 Main St, Anytown" required>
         </div>
 
         <!-- Line Items -->
@@ -130,7 +117,6 @@
           </button>
         </div>
 
-        <!-- status messages -->
         <div id="msgOk" class="mt-4 text-center hidden">
           <p class="text-sm font-medium text-green-600">Form submitted successfully!</p>
         </div>
@@ -154,44 +140,110 @@
     const msgOk = document.getElementById('msgOk');
     const msgErr = document.getElementById('msgErr');
 
-    // now each item has { description, qty, priorDamage: false|true }
-    let items = [{ description: '', qty: '', priorDamage: false }];
+    // ---- Autocomplete (keep your existing doGet/JSONP approach if used) ----
+    const jobInput = document.getElementById('jobName');
+    const suggestionBox = document.getElementById('jobSuggestions');
+    let projects = [];
+    function loadProjectsJSONP() {
+      const cb = 'projects_cb_' + Date.now();
+      window[cb] = function (data) { projects = Array.isArray(data) ? data : []; delete window[cb]; };
+      const s = document.createElement('script');
+      s.src = 'YOUR_EXEC_URL_HERE/exec?callback=' + cb; // <-- replace with your /exec
+      document.body.appendChild(s);
+    }
+    // loadProjectsJSONP(); // uncomment if you have doGet set up
+
+    jobInput && jobInput.addEventListener('input', () => {
+      if (!projects.length) return;
+      const query = jobInput.value.toLowerCase();
+      suggestionBox.innerHTML = '';
+      if (!query) { suggestionBox.classList.add('hidden'); return; }
+      const matches = projects.filter(p =>
+        (p.name || '').toLowerCase().includes(query) ||
+        (p.number || '').toLowerCase().includes(query)
+      );
+      matches.forEach(p => {
+        const li = document.createElement('li');
+        li.className = 'px-3 py-2 hover:bg-indigo-100 cursor-pointer';
+        li.textContent = `${p.number} – ${p.name}`;
+        li.addEventListener('click', () => { jobInput.value = `${p.number} – ${p.name}`; suggestionBox.classList.add('hidden'); });
+        suggestionBox.appendChild(li);
+      });
+      suggestionBox.classList.toggle('hidden', matches.length === 0);
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!suggestionBox.contains(e.target) && e.target !== jobInput) {
+        suggestionBox.classList.add('hidden');
+      }
+    });
+
+    // ---- Items state now includes room + oversized ----
+    let items = [{ room: '', description: '', qty: '', oversized: false, priorDamage: false }];
 
     function renderItems() {
       itemsContainer.innerHTML = '';
       items.forEach((item, index) => {
         const row = document.createElement('div');
-        row.className = 'flex flex-col sm:flex-row sm:items-end space-y-4 sm:space-y-0 sm:space-x-4 bg-gray-50 p-4 rounded-lg shadow-inner border border-gray-200';
+        row.className = 'flex flex-col sm:flex-row sm:items-end flex-wrap gap-4 bg-gray-50 p-4 rounded-lg shadow-inner border border-gray-200';
 
         const num = document.createElement('div');
-        num.className = 'sm:w-1/6 flex items-center justify-center sm:block';
+        num.className = 'w-full sm:w-16 flex items-center';
         num.innerHTML = `<span class="text-lg font-bold text-indigo-600">#${index + 1}</span>`;
 
+        // Room (NEW)
+        const roomWrap = document.createElement('div');
+        roomWrap.className = 'grow sm:flex-1 sm:min-w-[8rem]';
+        roomWrap.innerHTML = `
+          <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider">Room</label>
+          <input name="room[]" type="text"
+                 class="mt-1 block w-full rounded-md border-gray-300 focus:ring-indigo-500 focus:border-indigo-500 text-sm p-2"
+                 placeholder="e.g., Kitchen, Master Bed" value="${item.room || ''}">
+        `;
+        const roomInput = roomWrap.querySelector('input');
+        roomInput.addEventListener('input', (e) => { items[index].room = e.target.value; });
+
+        // Description
         const descWrap = document.createElement('div');
-        descWrap.className = 'w-full sm:w-1/2';
+        descWrap.className = 'grow sm:flex-1 sm:min-w-[12rem]';
         descWrap.innerHTML = `
           <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider">Description</label>
           <input name="description[]" type="text"
                  class="mt-1 block w-full rounded-md border-gray-300 focus:ring-indigo-500 focus:border-indigo-500 text-sm p-2"
-                 placeholder="e.g., Labor, Materials, etc." required value="${item.description}">
+                 placeholder="e.g., Labor, Materials, etc." required value="${item.description || ''}">
         `;
         const descInput = descWrap.querySelector('input');
         descInput.addEventListener('input', (e) => { items[index].description = e.target.value; });
 
+        // Qty
         const qtyWrap = document.createElement('div');
-        qtyWrap.className = 'sm:w-1/6';
+        qtyWrap.className = 'sm:w-28';
         qtyWrap.innerHTML = `
           <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider">Qty</label>
           <input name="qty[]" type="number" step="1"
                  class="mt-1 block w-full rounded-md border-gray-300 focus:ring-indigo-500 focus:border-indigo-500 text-sm p-2"
-                 placeholder="1" required value="${item.qty}">
+                 placeholder="1" required value="${item.qty || ''}">
         `;
         const qtyInput = qtyWrap.querySelector('input');
         qtyInput.addEventListener('input', (e) => { items[index].qty = e.target.value; });
 
-        // --- Prior Damage checkbox (plain checkbox) ---
+        // Oversized (NEW) – checkbox before Prior Damage
+        const overWrap = document.createElement('div');
+        overWrap.className = 'sm:w-48';
+        overWrap.innerHTML = `
+          <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider">Oversized</label>
+          <div class="mt-2 flex items-center gap-2">
+            <input name="oversized[]" type="checkbox" value="Yes" ${item.oversized ? 'checked' : ''}
+                   class="h-4 w-4 border-gray-300 rounded">
+            <span class="text-sm text-gray-700">Check if oversized</span>
+          </div>
+        `;
+        const overInput = overWrap.querySelector('input[type="checkbox"]');
+        overInput.addEventListener('change', (e) => { items[index].oversized = e.target.checked; });
+
+        // Prior Damage
         const priorWrap = document.createElement('div');
-        priorWrap.className = 'sm:w-1/3';
+        priorWrap.className = 'sm:w-64';
         priorWrap.innerHTML = `
           <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider">Prior Damage</label>
           <div class="mt-2 flex items-center gap-2">
@@ -201,9 +253,7 @@
           </div>
         `;
         const priorInput = priorWrap.querySelector('input[type="checkbox"]');
-        priorInput.addEventListener('change', (e) => {
-          items[index].priorDamage = e.target.checked;
-        });
+        priorInput.addEventListener('change', (e) => { items[index].priorDamage = e.target.checked; });
 
         // Remove button
         let removeBtn = null;
@@ -222,83 +272,81 @@
               <path d="M14 11v6"></path>
             </svg>
           `;
-          removeBtn.addEventListener('click', () => {
-            items = items.filter((_, i) => i !== index);
-            renderItems();
-          });
+          removeBtn.addEventListener('click', () => { items = items.filter((_, i) => i !== index); renderItems(); });
         }
 
         row.appendChild(num);
+        row.appendChild(roomWrap);
         row.appendChild(descWrap);
         row.appendChild(qtyWrap);
+        row.appendChild(overWrap);
         row.appendChild(priorWrap);
-        if (removeBtn) {
-          const btnWrap = document.createElement('div');
-          btnWrap.className = 'flex items-end';
-          btnWrap.appendChild(removeBtn);
-          row.appendChild(btnWrap);
-        }
+        if (removeBtn) row.appendChild(removeBtn);
 
         itemsContainer.appendChild(row);
       });
     }
 
     addItemBtn.addEventListener('click', () => {
-      items.push({ description: '', qty: '', priorDamage: false });
+      items.push({ room: '', description: '', qty: '', oversized: false, priorDamage: false });
       renderItems();
     });
 
-    // Initial render
     renderItems();
 
-    // pack JSON and show loader on submit
+    // Pack JSON + submit
     form.addEventListener('submit', () => {
-    msgOk.classList.add('hidden');
-    msgErr.classList.add('hidden');
-    saveIcon.classList.add('hidden');
-    loaderIcon.classList.remove('hidden');
-    submitText.textContent = 'Submitting...';
+      msgOk.classList.add('hidden');
+      msgErr.classList.add('hidden');
+      saveIcon.classList.add('hidden');
+      loaderIcon.classList.remove('hidden');
+      submitText.textContent = 'Submitting...';
 
-    /* ===== SYNC FROM DOM (add this block) ===== */
-    const descInputs = document.querySelectorAll('input[name="description[]"]');
-    const qtyInputs  = document.querySelectorAll('input[name="qty[]"]');
-    const priorInputs = document.querySelectorAll('input[name="priorDamage[]"]');
+      // Sync from DOM (ensures we capture current values)
+      const roomInputs  = document.querySelectorAll('input[name="room[]"]');
+      const descInputs  = document.querySelectorAll('input[name="description[]"]');
+      const qtyInputs   = document.querySelectorAll('input[name="qty[]"]');
+      const overInputs  = document.querySelectorAll('input[name="oversized[]"]');
+      const priorInputs = document.querySelectorAll('input[name="priorDamage[]"]');
 
-    items = Array.from(descInputs).map((descEl, i) => ({
-      description: descEl.value ?? '',
-      qty: (qtyInputs[i]?.value ?? ''),
-      priorDamage: !!(priorInputs[i]?.checked)  // boolean
-    }));
-    /* ===== END SYNC BLOCK ===== */
+      items = Array.from(descInputs).map((_, i) => ({
+        room:        roomInputs[i]?.value ?? '',
+        description: descInputs[i]?.value ?? '',
+        qty:         qtyInputs[i]?.value ?? '',
+        oversized:   !!(overInputs[i]?.checked),
+        priorDamage: !!(priorInputs[i]?.checked)
+      }));
 
-    const jobName = document.getElementById('jobName').value.trim();
-    const jobAddress = document.getElementById('jobAddress').value.trim();
+      const jobName = document.getElementById('jobName').value.trim();
+      const jobAddress = document.getElementById('jobAddress').value.trim();
 
-    const payload = {
-      jobName,
-      jobAddress,
-      lineItems: items.map((it, idx) => ({
-        itemNumber: idx + 1,
-        description: it.description,
-        qty: it.qty,
-        priorDamage: it.priorDamage     // true when checked
-      }))
-    };
-    document.getElementById('payload').value = JSON.stringify(payload);
+      const payload = {
+        jobName,
+        jobAddress,
+        lineItems: items.map((it, idx) => ({
+          itemNumber:  idx + 1,
+          room:        it.room,
+          description: it.description,
+          qty:         it.qty,
+          oversized:   it.oversized,
+          priorDamage: it.priorDamage
+        }))
+      };
+      document.getElementById('payload').value = JSON.stringify(payload);
 
-    const iframe = document.getElementById('hidden_iframe');
-    const onLoad = () => {
-      loaderIcon.classList.add('hidden');
-      saveIcon.classList.remove('hidden');
-      submitText.textContent = 'Submit Job';
-      msgOk.classList.remove('hidden');
-      form.reset();
-      items = [{ description: '', qty: '', priorDamage: false }];
-      renderItems();
-      iframe.removeEventListener('load', onLoad);
-    };
-    iframe.addEventListener('load', onLoad);
-  });
+      const iframe = document.getElementById('hidden_iframe');
+      const onLoad = () => {
+        loaderIcon.classList.add('hidden');
+        saveIcon.classList.remove('hidden');
+        submitText.textContent = 'Submit Job';
+        msgOk.classList.remove('hidden');
+        form.reset();
+        items = [{ room: '', description: '', qty: '', oversized: false, priorDamage: false }];
+        renderItems();
+        iframe.removeEventListener('load', onLoad);
+      };
+      iframe.addEventListener('load', onLoad);
+    });
   </script>
 </body>
 </html>
