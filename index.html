@@ -1,11 +1,12 @@
 <!doctype html>
 <html lang="en">
+ <head>
   <!-- PWA icon (optional if you already added) -->
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="icon.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<head>
+
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Job Details – ACR</title>
@@ -252,39 +253,52 @@
 
     // pack JSON and show loader on submit
     form.addEventListener('submit', () => {
-      msgOk.classList.add('hidden');
-      msgErr.classList.add('hidden');
-      saveIcon.classList.add('hidden');
-      loaderIcon.classList.remove('hidden');
-      submitText.textContent = 'Submitting...';
+    msgOk.classList.add('hidden');
+    msgErr.classList.add('hidden');
+    saveIcon.classList.add('hidden');
+    loaderIcon.classList.remove('hidden');
+    submitText.textContent = 'Submitting...';
 
-      const jobName = document.getElementById('jobName').value.trim();
-      const jobAddress = document.getElementById('jobAddress').value.trim();
-      const payload = {
-        jobName,
-        jobAddress,
-        lineItems: items.map((it, idx) => ({
-          itemNumber: idx + 1,
-          description: it.description,
-          qty: it.qty,
-          priorDamage: it.priorDamage // boolean; Apps Script converts to "Yes" if true
-        }))
-      };
-      document.getElementById('payload').value = JSON.stringify(payload);
+    /* ===== SYNC FROM DOM (add this block) ===== */
+    const descInputs = document.querySelectorAll('input[name="description[]"]');
+    const qtyInputs  = document.querySelectorAll('input[name="qty[]"]');
+    const priorInputs = document.querySelectorAll('input[name="priorDamage[]"]');
 
-      const iframe = document.getElementById('hidden_iframe');
-      const onLoad = () => {
-        loaderIcon.classList.add('hidden');
-        saveIcon.classList.remove('hidden');
-        submitText.textContent = 'Submit Job';
-        msgOk.classList.remove('hidden');
-        form.reset();
-        items = [{ description: '', qty: '', priorDamage: false }];
-        renderItems();
-        iframe.removeEventListener('load', onLoad);
-      };
-      iframe.addEventListener('load', onLoad);
-    });
+    items = Array.from(descInputs).map((descEl, i) => ({
+      description: descEl.value ?? '',
+      qty: (qtyInputs[i]?.value ?? ''),
+      priorDamage: !!(priorInputs[i]?.checked)  // boolean
+    }));
+    /* ===== END SYNC BLOCK ===== */
+
+    const jobName = document.getElementById('jobName').value.trim();
+    const jobAddress = document.getElementById('jobAddress').value.trim();
+
+    const payload = {
+      jobName,
+      jobAddress,
+      lineItems: items.map((it, idx) => ({
+        itemNumber: idx + 1,
+        description: it.description,
+        qty: it.qty,
+        priorDamage: it.priorDamage     // true when checked
+      }))
+    };
+    document.getElementById('payload').value = JSON.stringify(payload);
+
+    const iframe = document.getElementById('hidden_iframe');
+    const onLoad = () => {
+      loaderIcon.classList.add('hidden');
+      saveIcon.classList.remove('hidden');
+      submitText.textContent = 'Submit Job';
+      msgOk.classList.remove('hidden');
+      form.reset();
+      items = [{ description: '', qty: '', priorDamage: false }];
+      renderItems();
+      iframe.removeEventListener('load', onLoad);
+    };
+    iframe.addEventListener('load', onLoad);
+  });
   </script>
 </body>
 </html>
