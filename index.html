@@ -8,7 +8,7 @@
 
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Job Details – ACR</title>
+  <title>Job Details — ACR</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     .animate-spin { animation: spin 1s linear infinite; }
@@ -127,7 +127,7 @@
           <p class="text-sm font-medium text-red-600">Error submitting form. Please try again.</p>
         </div>
 
-        <p class="text-xs text-gray-500 mt-3 text-center">Tip: On iPhone, share → “Add to Home Screen”.</p>
+        <p class="text-xs text-gray-500 mt-3 text-center">Tip: On iPhone, share → "Add to Home Screen".</p>
       </form>
     </div>
   </div>
@@ -175,9 +175,9 @@
       matches.forEach(p => {
         const li = document.createElement('li');
         li.className = 'px-3 py-2 hover:bg-indigo-100 cursor-pointer';
-        li.textContent = `${p.number} – ${p.name}`;
+        li.textContent = `${p.number} — ${p.name}`;
         li.addEventListener('click', () => {
-          jobInput.value = `${p.number} – ${p.name}`;
+          jobInput.value = `${p.number} — ${p.name}`;
           suggestionBox.classList.add('hidden');
         });
         suggestionBox.appendChild(li);
@@ -300,12 +300,21 @@
       loaderIcon.classList.remove('hidden');
       submitText.textContent = 'Submitting...';
 
-      // Sync from DOM to ensure latest values
+      // FIXED CHECKBOX HANDLING - Get all checkboxes and split them properly
       const roomInputs  = document.querySelectorAll('input[name="room[]"]');
       const descInputs  = document.querySelectorAll('input[name="description[]"]');
       const qtyInputs   = document.querySelectorAll('input[name="qty[]"]');
-      const overInputs  = document.querySelectorAll('input[name="oversized[]"]');
-      const priorInputs = document.querySelectorAll('input[name="priorDamage[]"]');
+      
+      // Get all checkboxes and split them into oversized and prior damage
+      const allCheckboxes = document.querySelectorAll('input[type="checkbox"]');
+      const overInputs = [];
+      const priorInputs = [];
+      
+      // Split checkboxes: first checkbox of each pair is oversized, second is prior damage
+      for (let i = 0; i < allCheckboxes.length; i += 2) {
+        overInputs.push(allCheckboxes[i]);
+        priorInputs.push(allCheckboxes[i + 1]);
+      }
 
       items = Array.from(descInputs).map((_, i) => ({
         room:        roomInputs[i]?.value ?? '',
@@ -331,6 +340,9 @@
         }))
       };
       document.getElementById('payload').value = JSON.stringify(payload);
+
+      // Debug logging (remove this line after testing)
+      console.log('Payload being sent:', payload);
 
       // Reset UI after the hidden iframe load completes
       const iframe = document.getElementById('hidden_iframe');
